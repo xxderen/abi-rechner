@@ -1,0 +1,56 @@
+# Baut die App bei jedem Push auf main, lässt alle Tests laufen und veröffentlicht
+# sie auf GitHub Pages. Einmalig nötig: Settings → Pages → Source: „GitHub Actions“.
+name: Deploy auf GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: GitHub Pages prüfen
+        uses: actions/configure-pages@v6
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Abhängigkeiten installieren
+        run: npm ci
+
+      - name: Tests
+        run: npm test
+
+      # vite.config.ts setzt base automatisch auf /<Repo-Name>/ (aus GITHUB_REPOSITORY)
+      - name: Build
+        run: npm run build
+
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Veröffentlichen
+        id: deployment
+        uses: actions/deploy-pages@v5

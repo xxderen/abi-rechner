@@ -1,0 +1,20 @@
+# Abhängigkeiten und Build
+node_modules
+dist
+dist-ssr
+coverage
+*.local
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Editor / System
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+Thumbs.db
+*.suo
+*.sw?
